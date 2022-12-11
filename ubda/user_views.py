@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from werkzeug.security import check_password_hash, generate_password_hash
 from .models import User, Access_level, Device
 from . import db
-import datetime
+from datetime import datetime
 
 
 user_views = Blueprint('user_views', __name__)
@@ -34,6 +34,7 @@ def new_user():
         password2 = request.form.get('password2')
         access_level = request.form.get('access_level')
         card_number = request.form.get('card_number')
+        print('****')
         try:
             valid_thru = datetime.strptime(request.form.get('valid_thru'), '%Y-%m-%d')
         except:
@@ -47,7 +48,7 @@ def new_user():
             flash("Passwords don't match.", category='error')
         elif len(password1) < 5:
             flash('Password must be at least 5 characters.', category='error')
-        elif not valid_thru:
+        elif valid_thru is None:
             flash('No date.', category='error')
         else:
             new_user = User(user_name = user_name, 
@@ -60,7 +61,7 @@ def new_user():
             db.session.add(new_user)
             db.session.commit()
             flash('User added', category='success')
-            return redirect(url_for('views.users'))
+            return redirect(url_for('user_views.users'))
     accessLevels = Access_level.query.all()
     return render_template("new_user.html", user=current_user, accessLevels = accessLevels)
 
@@ -88,7 +89,7 @@ def edit_user(id):
         db.session.add(user)
         db.session.commit()
         flash('Person information updated', category='success')
-        return redirect(url_for('views.users'))
+        return redirect(url_for('user_views.users'))
     access_levels = Access_level.query.all() 
     return render_template("edit_user.html", current_user = current_user, 
                                             user = user, 
@@ -101,12 +102,12 @@ def delete_user(id):
     user = User.query.filter_by(id=id).first()
     if not user :
         flash(f'No user with id:{id}', category='error')
-        return redirect(url_for('views.users'))
+        return redirect(url_for('user_views.users'))
     if request.method == 'POST':
         db.session.delete(user)
         db.session.commit()
         flash('Person deleted', category='success')
-        return redirect(url_for('views.users'))
+        return redirect(url_for('user_views.users'))
     return render_template("delete_user.html", current_user = current_user, user=user)
 
 
