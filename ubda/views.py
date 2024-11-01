@@ -5,7 +5,7 @@ from . import db
 import time
 from datetime import datetime
 from werkzeug.security import generate_password_hash
-
+from .device_server import send_reset_cmd
 
 views = Blueprint('views', __name__)
 
@@ -107,6 +107,21 @@ def delete_device(id):
         flash('Device deleted', category='success')
         return redirect(url_for('views.devices'))
     return render_template("delete_device.html", user = current_user, device=device)
+
+@views.route('/reset_device/<string:id>', methods=['GET', 'POST'])
+@login_required
+def reset_device(id):
+    device = Device.query.filter_by(id=id).first()
+    if not device :
+        flash(f'No device with id:{id}', category='error')
+        return redirect(url_for('views.devices'))
+    if request.method == 'POST':
+        ###send reset command
+        send_reset_cmd(device)
+        ###
+        flash('Reset request sent', category='success')
+        return redirect(url_for('views.devices'))
+    return render_template("reset_device.html", user = current_user, device=device)
 
 
 @views.route('/device_log/<string:id>')

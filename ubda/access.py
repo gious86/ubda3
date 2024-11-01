@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, flash, url_for, send_fil
 from flask_login import login_user, current_user
 from .models import User, Device
 from . import hostname
-from .device_server import activate_allowed_outputs
+from .device_server import activate_allowed_outputs, online_devices
 import qrcode, io
 from werkzeug.security import check_password_hash
 
@@ -34,11 +34,14 @@ def url_access(id):
     if current_user.is_authenticated:
         device = Device.query.filter_by(mac = id).first()
         if not device:
-            flash(f'device with id:{id} does not exist!')
+            flash(f'device with id:{id} does not exist!', category='error')
         elif activate_allowed_outputs(current_user, device, 'pin') > 0: 
-            flash(f'Welcome {current_user.user_name}')
+            if device.id in online_devices:
+                flash(f'Welcome {current_user.user_name}')
+            else: 
+                flash(f'Sorry {current_user.user_name}, Device is offline', category='error')
         else:
-            flash(f'Sorry {current_user.user_name}, you have no access!')
+            flash(f'Sorry {current_user.user_name}, you have no access!', category='error')
     return render_template('acc.html', url = url_for('access.url_access', id=id))
 
 

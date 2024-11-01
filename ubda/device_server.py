@@ -7,6 +7,8 @@ import time
 
 to_devices = {}
 
+online_devices = {}
+
 
 def activate_allowed_outputs(user, device, method):
     log_entry = Access_log(device = device.id, user = user.id)
@@ -26,6 +28,9 @@ def activate_allowed_outputs(user, device, method):
     db.session.add(log_entry)
     db.session.commit()
     return result
+
+def send_reset_cmd(device):
+    to_devices.update({device.id:'{"cmd":"reset"}'}) 
 
 
 @sock.route('/ws/<string:id>')
@@ -69,6 +74,10 @@ def dev_server(ws, id):
                 print(f'device with id:{id} added to DB')
             else :
                 print('known device')
+                device.last_seen = int(time.time())
+                db.session.add(device)
+                db.session.commit()
+        online_devices.update({device.id:device.mac}) 
         while True:
             try:
                 data = ws.receive(1) 
@@ -103,5 +112,7 @@ def dev_server(ws, id):
                     ws.send(cmd)
                     to_devices.pop(device.id)
             except Exception as e:
+                online_devices.pop(device.id)
                 print(f'connection with "{id}" closed. e:{e}')
+                print(online_devices)
                 break

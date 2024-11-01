@@ -44,6 +44,7 @@
     <td><a href="{{ url_for('access.qr_generator', id = dev.mac) }}">QR</a></td>
     <td><a href="{{ url_for('views.delete_device', id = dev.id) }}">Delete</a></td>
     <td><a href="{{ url_for('views.edit_device', id = dev.id) }}">Edit</a></td>
+    <td><a href="{{ url_for('views.reset_device', id = dev.id) }}">Reset</a></td>
   </tr>
   {% endfor %}
 </table>

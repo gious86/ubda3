@@ -8,7 +8,7 @@ hostname = 'http://192.168.1.102:5000'
 
 device_models = {
     'fumfli 1.0':{
-        'outputs':4, 
+        'outputs':1, 
         'inputs':1,
         },
     'fumfli-16 1.0':{
